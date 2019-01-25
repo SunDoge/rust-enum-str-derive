@@ -3,7 +3,8 @@ os:
   - linux
   - osx
 rust:
-  - nightly
+  # - nightly
+  - beta
 notifications:
   email: false
 before_script:
@@ -13,5 +14,5 @@ before_script:
 script:
   - cargo build --verbose
   - cargo test --verbose
-  - cargo +nightly fmt --all -- --write-mode=diff
-  - cargo +nightly clippy --all -- --deny warnings
+  - cargo fmt --all
+  - cargo clippy --all -- --deny warnings
