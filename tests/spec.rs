@@ -9,9 +9,6 @@ CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 */
 
-#![cfg_attr(feature = "cargo-clippy", allow(blacklisted_name))]
-#![feature(proc_macro)]
-
 extern crate enum_str_derive;
 
 use enum_str_derive::{EnumStrCamelCase, EnumStrKebabCase, EnumStrMixedCase};
@@ -34,6 +31,13 @@ pub enum Struct {
     BarBaz { value: Vec<String> }
 }
 
+#[derive(EnumStrKebabCase)]
+pub enum DType {
+    Float16,
+    Float32,
+    Float64
+}
+
 #[test]
 fn test_1() {
     let foo = Unit::Foo;
@@ -54,13 +58,17 @@ fn test_2() {
 
 #[test]
 fn test_3() {
-    let foo = Struct::Foo {
-        value: "heck".to_string()
-    };
+    let foo = Struct::Foo { value: "heck".to_string() };
     assert_eq!(foo.as_ref(), "foo");
 
     let bar = Struct::BarBaz {
         value: vec!["heck".to_string()]
     };
     assert_eq!(bar.as_ref(), "barBaz");
+}
+
+#[test]
+fn test_dtype() {
+    let dtype = DType::Float16;
+    assert_eq!(dtype.as_ref(), "float16");
 }

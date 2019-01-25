@@ -9,12 +9,9 @@ CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 */
 
-use quote;
-use syn;
-
 use heck::{CamelCase, KebabCase, MixedCase, ShoutySnakeCase, SnakeCase, TitleCase};
 
-pub fn generate_impl(ast: &syn::DeriveInput, body: quote::Tokens) -> quote::Tokens {
+pub fn generate_impl(ast: &syn::DeriveInput, body: proc_macro2::TokenStream) -> proc_macro2::TokenStream {
     let name = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
 
@@ -33,22 +30,23 @@ pub fn generate_impl(ast: &syn::DeriveInput, body: quote::Tokens) -> quote::Toke
     }
 }
 
-pub fn expand_macro(ast: &syn::DeriveInput, case_type: &str) -> quote::Tokens {
-    match ast.body {
-        syn::Body::Struct(_) => panic!("Can't derive structs"),
-        syn::Body::Enum(ref data) => expand_enum(ast, data, case_type)
+pub fn expand_macro(ast: &syn::DeriveInput, case_type: &str) -> proc_macro2::TokenStream {
+    match ast.data {
+        syn::Data::Struct(_) => panic!("Can't derive structs"),
+        syn::Data::Enum(ref data) => expand_enum(ast, data, case_type),
+        _ => unreachable!()
     }
 }
 
-pub fn expand_enum(ast: &syn::DeriveInput, variants: &[syn::Variant], case_type: &str) -> quote::Tokens {
-    let variants_iterator = variants.iter().map(|variant| {
+pub fn expand_enum(ast: &syn::DeriveInput, data: &syn::DataEnum, case_type: &str) -> proc_macro2::TokenStream {
+    let variants_iterator = data.variants.iter().map(|variant| {
         let struct_name = &ast.ident;
         let variant_name = &variant.ident;
 
-        match variant.data {
-            syn::VariantData::Unit => expand_match_enum_unit_variant(struct_name, variant_name, case_type),
-            syn::VariantData::Tuple(_) => expand_match_enum_tuple_variant(struct_name, variant_name, case_type),
-            syn::VariantData::Struct(_) => expand_match_enum_struct_variant(struct_name, variant_name, case_type)
+        match variant.fields {
+            syn::Fields::Unit => expand_match_enum_unit_variant(struct_name, variant_name, case_type),
+            syn::Fields::Unnamed(_) => expand_match_enum_tuple_variant(struct_name, variant_name, case_type),
+            syn::Fields::Named(_) => expand_match_enum_struct_variant(struct_name, variant_name, case_type)
         }
     });
 
@@ -62,7 +60,7 @@ pub fn expand_enum(ast: &syn::DeriveInput, variants: &[syn::Variant], case_type:
     )
 }
 
-pub fn expand_match_enum_unit_variant(struct_name: &syn::Ident, variant_name: &syn::Ident, case_type: &str) -> quote::Tokens {
+pub fn expand_match_enum_unit_variant(struct_name: &syn::Ident, variant_name: &syn::Ident, case_type: &str) -> proc_macro2::TokenStream {
     let ident = quote! { #struct_name::#variant_name };
     let variant_name_str = convert_case(&variant_name.to_string(), case_type);
 
@@ -73,7 +71,7 @@ pub fn expand_match_enum_unit_variant(struct_name: &syn::Ident, variant_name: &s
     }
 }
 
-pub fn expand_match_enum_tuple_variant(struct_name: &syn::Ident, variant_name: &syn::Ident, case_type: &str) -> quote::Tokens {
+pub fn expand_match_enum_tuple_variant(struct_name: &syn::Ident, variant_name: &syn::Ident, case_type: &str) -> proc_macro2::TokenStream {
     let ident = quote! { #struct_name::#variant_name };
     let variant_name_str = convert_case(&variant_name.to_string(), case_type);
 
@@ -84,7 +82,7 @@ pub fn expand_match_enum_tuple_variant(struct_name: &syn::Ident, variant_name: &
     }
 }
 
-pub fn expand_match_enum_struct_variant(struct_name: &syn::Ident, variant_name: &syn::Ident, case_type: &str) -> quote::Tokens {
+pub fn expand_match_enum_struct_variant(struct_name: &syn::Ident, variant_name: &syn::Ident, case_type: &str) -> proc_macro2::TokenStream {
     let ident = quote! { #struct_name::#variant_name };
     let variant_name_str = convert_case(&variant_name.to_string(), case_type);
 
