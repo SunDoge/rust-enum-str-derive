@@ -37,9 +37,9 @@ Available derives:
 #![feature(proc_macro)]
 extern crate enum_str_derive;
 
-use enum_str_derive::{EnumStrSnakeCase};
+use enum_str_derive::{EnumStrKebabCase};
 
-#[derive(EnumStrCamelCase)]
+#[derive(EnumStrKebabCase)]
 enum Data {
     Foo,
     BarBaz

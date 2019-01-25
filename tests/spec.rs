@@ -11,7 +11,7 @@ specific language governing permissions and limitations under the License.
 
 extern crate enum_str_derive;
 
-use enum_str_derive::{EnumStrCamelCase, EnumStrKebabCase, EnumStrMixedCase};
+use enum_str_derive::{EnumStrCamelCase, EnumStrKebabCase, EnumStrMixedCase, EnumStrSnakeCase};
 
 #[derive(EnumStrCamelCase)]
 pub enum Unit {
@@ -31,7 +31,7 @@ pub enum Struct {
     BarBaz { value: Vec<String> }
 }
 
-#[derive(EnumStrKebabCase)]
+#[derive(EnumStrSnakeCase)]
 pub enum DType {
     Float16,
     Float32,
@@ -68,7 +68,7 @@ fn test_3() {
 }
 
 #[test]
-fn test_dtype() {
+fn test_dtype_snake_case() {
     let dtype = DType::Float16;
     assert_eq!(dtype.as_ref(), "float16");
 }
